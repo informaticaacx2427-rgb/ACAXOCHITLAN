@@ -29,7 +29,7 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      # ✅ ARCHIVE REAL CON XCODE
+      # 🔥 FIX IMPORTANTE: archive con signing forzado
       - name: Build iOS Archive
         script: |
           set -ex
@@ -38,9 +38,12 @@ workflows:
             -scheme Runner \
             -configuration Release \
             -archivePath build/ios/archive/Runner.xcarchive \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=$APPLE_TEAM_ID \
+            -allowProvisioningUpdates \
             archive
 
-      # ✅ EXPORT REAL IPA
+      # 🔥 EXPORT CORRECTO
       - name: Export IPA
         script: |
           set -ex
@@ -48,7 +51,8 @@ workflows:
           xcodebuild -exportArchive \
             -archivePath build/ios/archive/Runner.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates
 
       # 🔍 DEBUG (opcional pero útil)
       - name: Find IPA (DEBUG)
@@ -56,7 +60,7 @@ workflows:
           echo "Searching for IPA files..."
           find . -name "*.ipa"
 
-      - name: Check iOS build output (DEBUG)
+      - name: Check iOS output (DEBUG)
         script: |
           echo "Checking build/ios folder..."
           ls -R build/ios || true
