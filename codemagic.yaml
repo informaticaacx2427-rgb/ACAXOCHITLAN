@@ -25,44 +25,22 @@ workflows:
           pod install
           cd ..
 
-      # 🔥 CRÍTICO: aplicar perfiles correctamente
       - name: Set up code signing
         script: |
           xcode-project use-profiles
 
-      # 🔥 FIX REAL: forzar signing dentro de Xcode build settings
-      - name: Fix Xcode signing
-        script: |
-          set -ex
-
-          cd ios
-
-          # asegurar team en proyecto
-          sed -i '' "s/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = $CM_TEAM_ID;/g" Runner.xcodeproj/project.pbxproj || true
-
-      # 🔥 BUILD CORRECTO
+      # ✅ BUILD LIMPIO (SIN HACKS)
       - name: Build iOS Archive
         script: |
           set -ex
 
-          xcodebuild -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            CODE_SIGN_STYLE=Automatic \
-            -allowProvisioningUpdates \
-            archive
+          flutter build ipa --release
 
-      # 🔥 EXPORT CORRECTO
-      - name: Export IPA
+      # 🔍 DEBUG OPCIONAL
+      - name: Find IPA
         script: |
-          set -ex
-
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -allowProvisioningUpdates
+          echo "Searching IPA..."
+          find . -name "*.ipa"
 
     artifacts:
       - build/ios/ipa/*.ipa
