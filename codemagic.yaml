@@ -28,6 +28,18 @@ workflows:
         script: |
           xcode-project use-profiles
 
+      - name: Pod install clean
+        script: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod install
+          cd ..
+
+      - name: Prepare export folder
+        script: |
+          rm -rf build/ios/ipa
+          mkdir -p build/ios/ipa
+
       - name: Build Archive
         script: |
           xcodebuild -workspace ios/Runner.xcworkspace \
