@@ -28,15 +28,21 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build IPA
+      - name: Build Archive
         script: |
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          xcodebuild -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            archive
 
-      - name: Ensure IPA export folder
+      - name: Export IPA
         script: |
-          mkdir -p build/ios/ipa
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/ipa/*.zip
       - build/ios/archive/*.xcarchive
