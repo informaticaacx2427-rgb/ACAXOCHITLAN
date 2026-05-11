@@ -28,15 +28,11 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build signed IPA
+      - name: Build IPA
         script: |
           flutter build ipa --release
 
-      - name: Verify IPA
-        script: |
-          find build/ios -name "*.ipa"
-
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/archive/*.ipa
-      - build/ios/**/*.ipa
+      - build/ios/ipa/*.zip
+      - build/ios/archive/*.xcarchive
