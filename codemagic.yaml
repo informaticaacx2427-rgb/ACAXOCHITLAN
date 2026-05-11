@@ -29,9 +29,14 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build IPA
+      - name: Build IPA (verbose)
         script: |
-          flutter build ipa --release
+          set -ex
+          flutter build ipa --release --verbose
+
+      - name: Inspect output
+        script: |
+          ls -R build/ios || true
 
     artifacts:
       - build/ios/ipa/*.ipa
