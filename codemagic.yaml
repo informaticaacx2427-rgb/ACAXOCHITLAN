@@ -21,6 +21,7 @@ workflows:
       - name: Install CocoaPods
         script: |
           cd ios
+          rm -rf Pods Podfile.lock
           pod install
           cd ..
 
@@ -28,10 +29,28 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build IPA (verbose)
+      # ✅ ARCHIVE REAL CON XCODE
+      - name: Build iOS Archive
         script: |
-          flutter build ipa --release --verbose
+          set -ex
 
+          xcodebuild -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            archive
+
+      # ✅ EXPORT REAL IPA
+      - name: Export IPA
+        script: |
+          set -ex
+
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/ExportOptions.plist
+
+      # 🔍 DEBUG (opcional pero útil)
       - name: Find IPA (DEBUG)
         script: |
           echo "Searching for IPA files..."
