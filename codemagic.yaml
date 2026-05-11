@@ -30,7 +30,11 @@ workflows:
 
       - name: Build IPA
         script: |
-          flutter build ipa --release
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
+      - name: Ensure IPA export folder
+        script: |
+          mkdir -p build/ios/ipa
 
     artifacts:
       - build/ios/ipa/*.ipa
