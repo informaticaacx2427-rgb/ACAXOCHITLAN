@@ -25,11 +25,22 @@ workflows:
           pod install
           cd ..
 
+      # 🔥 CRÍTICO: aplicar perfiles correctamente
       - name: Set up code signing
         script: |
           xcode-project use-profiles
 
-      # 🔥 FIX CRÍTICO: FORZAR TEAM + SIGNING
+      # 🔥 FIX REAL: forzar signing dentro de Xcode build settings
+      - name: Fix Xcode signing
+        script: |
+          set -ex
+
+          cd ios
+
+          # asegurar team en proyecto
+          sed -i '' "s/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = $CM_TEAM_ID;/g" Runner.xcodeproj/project.pbxproj || true
+
+      # 🔥 BUILD CORRECTO
       - name: Build iOS Archive
         script: |
           set -ex
@@ -39,11 +50,10 @@ workflows:
             -configuration Release \
             -archivePath build/ios/archive/Runner.xcarchive \
             CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM=$CM_TEAM_ID \
             -allowProvisioningUpdates \
             archive
 
-      # 🔥 EXPORT IPA REAL
+      # 🔥 EXPORT CORRECTO
       - name: Export IPA
         script: |
           set -ex
@@ -54,17 +64,5 @@ workflows:
             -exportOptionsPlist ios/ExportOptions.plist \
             -allowProvisioningUpdates
 
-      # 🔍 DEBUG (opcional)
-      - name: Find IPA (DEBUG)
-        script: |
-          echo "Searching for IPA..."
-          find . -name "*.ipa"
-
-      - name: Check build output (DEBUG)
-        script: |
-          echo "Checking iOS build folder..."
-          ls -R build/ios || true
-
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/**/*.ipa
