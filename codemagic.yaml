@@ -1,6 +1,6 @@
 workflows:
   ios-release:
-    name: iOS Release to TestFlight
+    name: iOS Release
 
     max_build_duration: 60
 
@@ -8,7 +8,7 @@ workflows:
       flutter: stable
       xcode: latest
 
-      # 👇 AQUÍ SE AGREGA EL GRUPO
+      # 🔑 IMPORTANTE: grupo de variables
       groups:
         - ACAXOCHITLAN
 
@@ -28,14 +28,11 @@ workflows:
           pod install
           cd ..
 
-      - name: Setup code signing (App Store)
+      - name: Build iOS
         script: |
-          keychain initialize
-          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
-          keychain add-certificates
-          xcode-project use-profiles
+          flutter build ios --release --no-codesign
 
-      - name: Build iOS archive
+      - name: Archive
         script: |
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme Runner \
