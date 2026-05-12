@@ -24,7 +24,7 @@ workflows:
           pod install
           cd ..
 
-      - name: Setup code signing (APP STORE)
+      - name: Set up code signing (App Store)
         script: |
           keychain initialize
           app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
@@ -51,4 +51,5 @@ workflows:
 
     publishing:
       app_store_connect:
+        api_key: $APP_STORE_CONNECT_API_KEY
         submit_to_testflight: true
