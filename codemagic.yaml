@@ -24,14 +24,14 @@ workflows:
           pod install
           cd ..
 
-      - name: Set up code signing (App Store)
+      - name: Setup code signing
         script: |
           keychain initialize
           app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Build iOS archive
+      - name: Build archive
         script: |
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme Runner \
@@ -51,5 +51,8 @@ workflows:
 
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_API_KEY
+        api_key:
+          key: $APP_STORE_CONNECT_API_KEY
+          key_id: $APP_STORE_CONNECT_KEY_ID
+          issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
