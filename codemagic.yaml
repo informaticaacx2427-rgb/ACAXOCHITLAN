@@ -28,16 +28,23 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      # 🔥 BUILD CORRECTO PARA CODEMAGIC
       - name: Build IPA
         script: |
-          flutter build ipa --release --export-method app-store --verbose
+          set -e
 
-      # 🔍 DEBUG (opcional pero útil)
-      - name: Check IPA output
+          flutter build ipa \
+            --release \
+            --export-method app-store \
+            --verbose
+
+      - name: Debug IPA
         script: |
-          echo "Searching IPA..."
-          find build -name "*.ipa" || true
+          echo "=== SEARCHING IPA FILES ==="
+          find . -name "*.ipa"
+
+          echo "=== BUILD IOS FOLDER ==="
+          ls -R build/ios || true
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/**/*.ipa
