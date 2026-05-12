@@ -24,26 +24,21 @@ workflows:
           pod install
           cd ..
 
-      # CERTIFICADOS Y PROFILES (AD HOC)
       - name: Set up code signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_ADHOC --create
+          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
           keychain add-certificates
           xcode-project use-profiles
 
-      # BUILD ARCHIVE
       - name: Build Archive
         script: |
-          flutter build ios --release --no-codesign
-
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath build/ios/archive/Runner.xcarchive \
             archive
 
-      # EXPORT IPA
       - name: Export IPA
         script: |
           xcodebuild -exportArchive \
@@ -51,11 +46,10 @@ workflows:
             -exportOptionsPlist ios/ExportOptions.plist \
             -exportPath build/ios/ipa
 
-      # DEBUG
-      - name: Debug IPA
-        script: |
-          find build -name "*.ipa" || true
-
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/**/*.ipa
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
