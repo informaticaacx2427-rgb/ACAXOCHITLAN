@@ -1,6 +1,6 @@
 workflows:
   ios-release:
-    name: iOS IPA Release
+    name: iOS Release to TestFlight
 
     max_build_duration: 60
 
@@ -24,7 +24,7 @@ workflows:
           pod install
           cd ..
 
-      - name: Set up code signing (APP STORE)
+      - name: Setup code signing (APP STORE)
         script: |
           keychain initialize
           app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
@@ -51,5 +51,4 @@ workflows:
 
     publishing:
       app_store_connect:
-        auth: integration
         submit_to_testflight: true
