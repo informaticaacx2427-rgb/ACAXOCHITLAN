@@ -13,7 +13,7 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      - name: Get Flutter packages
+      - name: Clean project
         script: |
           flutter clean
           flutter pub get
@@ -21,7 +21,6 @@ workflows:
       - name: Install CocoaPods
         script: |
           cd ios
-          rm -rf Pods Podfile.lock
           pod install
           cd ..
 
@@ -29,9 +28,16 @@ workflows:
         script: |
           xcode-project use-profiles
 
+      # 🔥 BUILD CORRECTO PARA CODEMAGIC
       - name: Build IPA
         script: |
-          flutter build ipa --release
+          flutter build ipa --release --export-method app-store --verbose
+
+      # 🔍 DEBUG (opcional pero útil)
+      - name: Check IPA output
+        script: |
+          echo "Searching IPA..."
+          find build -name "*.ipa" || true
 
     artifacts:
       - build/ios/ipa/*.ipa
