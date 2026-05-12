@@ -2,8 +2,6 @@ workflows:
   ios-release:
     name: iOS IPA Release
 
-    max_build_duration: 60
-
     environment:
       flutter: stable
       xcode: latest
@@ -12,19 +10,22 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
 
+    integrations:
+      app_store_connect: codemagic
+
     scripts:
-      - name: Clean project
+      - name: Clean
         script: |
           flutter clean
           flutter pub get
 
-      - name: Install CocoaPods
+      - name: CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      - name: Set up code signing
+      - name: Signing
         script: |
           keychain initialize
           app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
