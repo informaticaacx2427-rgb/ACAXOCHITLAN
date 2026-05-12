@@ -4,9 +4,6 @@ workflows:
 
     max_build_duration: 60
 
-    integrations:
-      app_store_connect: codemagic
-
     environment:
       flutter: stable
       xcode: latest
@@ -27,7 +24,7 @@ workflows:
           pod install
           cd ..
 
-      # 🔥 ACTIVA CERTIFICADOS Y PROFILES
+      # 🔥 CODE SIGNING REAL
       - name: Set up code signing
         script: |
           keychain initialize
@@ -44,7 +41,7 @@ workflows:
             --export-options-plist=ios/ExportOptions.plist
 
       # 🔍 DEBUG
-      - name: Find IPA
+      - name: Debug IPA
         script: |
           echo "Searching IPA..."
           find build -name "*.ipa" || true
