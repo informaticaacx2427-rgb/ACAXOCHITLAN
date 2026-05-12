@@ -14,12 +14,19 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
+        use_automatic_signing: true
 
     scripts:
       - name: Clean project
         script: |
           flutter clean
           flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+          cd ..
 
       - name: Build IPA
         script: |
