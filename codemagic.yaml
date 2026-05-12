@@ -13,7 +13,7 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      - name: Clean project
+      - name: Get Flutter packages
         script: |
           flutter clean
           flutter pub get
@@ -29,18 +29,9 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      # ✅ BUILD LIMPIO (SIN HACKS)
-      - name: Build iOS Archive
+      - name: Build IPA
         script: |
-          set -ex
-
           flutter build ipa --release
-
-      # 🔍 DEBUG OPCIONAL
-      - name: Find IPA
-        script: |
-          echo "Searching IPA..."
-          find . -name "*.ipa"
 
     artifacts:
       - build/ios/ipa/*.ipa
