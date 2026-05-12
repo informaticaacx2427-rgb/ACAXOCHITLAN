@@ -8,7 +8,7 @@ workflows:
       flutter: stable
       xcode: latest
 
-      # 🔑 IMPORTANTE: grupo de variables
+      # 🔑 GRUPO DE VARIABLES (OBLIGATORIO)
       groups:
         - ACAXOCHITLAN
 
@@ -28,11 +28,11 @@ workflows:
           pod install
           cd ..
 
-      - name: Build iOS
+      - name: Build iOS (no codesign)
         script: |
           flutter build ios --release --no-codesign
 
-      - name: Archive
+      - name: Archive iOS
         script: |
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme Runner \
