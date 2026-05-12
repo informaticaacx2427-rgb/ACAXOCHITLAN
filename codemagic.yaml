@@ -8,6 +8,7 @@ workflows:
       flutter: stable
       xcode: latest
 
+      # 🔑 GRUPO DE VARIABLES (OBLIGATORIO)
       groups:
         - ACAXOCHITLAN
 
@@ -51,8 +52,7 @@ workflows:
 
     publishing:
       app_store_connect:
-        api_key:
-          key: $APP_STORE_CONNECT_API_KEY
-          key_id: $APP_STORE_CONNECT_KEY_ID
-          issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        api_key: $APP_STORE_CONNECT_API_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
