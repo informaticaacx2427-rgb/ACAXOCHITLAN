@@ -9,7 +9,7 @@ workflows:
       xcode: latest
 
       ios_signing:
-        distribution_type: app_store
+        distribution_type: ad_hoc
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
@@ -24,11 +24,11 @@ workflows:
           pod install
           cd ..
 
-      # CERTIFICADOS Y PROFILES
+      # CERTIFICADOS Y PROFILES (AD HOC)
       - name: Set up code signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_ADHOC --create
           keychain add-certificates
           xcode-project use-profiles
 
@@ -43,7 +43,7 @@ workflows:
             -archivePath build/ios/archive/Runner.xcarchive \
             archive
 
-      # EXPORT IPA MANUAL
+      # EXPORT IPA
       - name: Export IPA
         script: |
           xcodebuild -exportArchive \
@@ -54,7 +54,6 @@ workflows:
       # DEBUG
       - name: Debug IPA
         script: |
-          echo "Searching IPA..."
           find build -name "*.ipa" || true
 
     artifacts:
