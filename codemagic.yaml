@@ -16,21 +16,18 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      # LIMPIEZA
       - name: Clean project
         script: |
           flutter clean
           flutter pub get
 
-      # COCOAPODS
       - name: Install CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      # FIRMA APP STORE (PROFILES AUTOMÁTICOS)
-      - name: Set up code signing
+      - name: Fetch signing files
         script: |
           keychain initialize
 
@@ -42,15 +39,26 @@ workflows:
 
           xcode-project use-profiles
 
-      # BUILD IPA (CORRECTO EN FLUTTER)
-      - name: Build IPA
+      # 🔥 BUILD ARCHIVE MANUAL (EVITA BUG FLUTTER IPA)
+      - name: Build Archive
         script: |
-          flutter build ipa --release
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            archive
 
-      # VERIFICAR OUTPUT
+      # 🔥 EXPORT CORRECTO (FIX PROVISIONING PROFILE)
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
+
       - name: Verify IPA
         script: |
-          echo "Buscando IPA generado..."
           find build -name "*.ipa"
 
     artifacts:
@@ -60,4 +68,3 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
