@@ -4,6 +4,9 @@ workflows:
 
     max_build_duration: 60
 
+    integrations:
+      app_store_connect: Codemagic
+
     environment:
       flutter: stable
       xcode: latest
@@ -19,14 +22,14 @@ workflows:
           flutter clean
           flutter pub get
 
-      # COCOAPODS
+      # INSTALAR PODS
       - name: Install CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      # CONFIGURAR CERTIFICADOS Y PROFILES APP STORE
+      # CERTIFICADOS Y PERFILES
       - name: Set up code signing
         script: |
           keychain initialize
@@ -39,12 +42,12 @@ workflows:
 
           xcode-project use-profiles
 
-      # BUILD IOS
-      - name: Build iOS
+      # BUILD IPA
+      - name: Build iOS IPA
         script: |
           flutter build ipa --release
 
-      # VERIFICAR IPA
+      # DEBUG
       - name: Debug IPA
         script: |
           find build -name "*.ipa" || true
@@ -57,7 +60,6 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-
         submit_to_testflight: true
 
         beta_groups:
