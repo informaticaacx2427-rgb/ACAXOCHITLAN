@@ -5,7 +5,7 @@ workflows:
     max_build_duration: 60
 
     integrations:
-      app_store_connect: Codemagic
+      app_store_connect: Codemagic App
 
     environment:
       flutter: stable
@@ -16,20 +16,17 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      # LIMPIAR PROYECTO
       - name: Clean project
         script: |
           flutter clean
           flutter pub get
 
-      # INSTALAR PODS
       - name: Install CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      # CERTIFICADOS Y PERFILES
       - name: Set up code signing
         script: |
           keychain initialize
@@ -42,12 +39,10 @@ workflows:
 
           xcode-project use-profiles
 
-      # BUILD IPA
-      - name: Build iOS IPA
+      - name: Build IPA
         script: |
           flutter build ipa --release
 
-      # DEBUG
       - name: Debug IPA
         script: |
           find build -name "*.ipa" || true
@@ -55,12 +50,8 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
 
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-
-        beta_groups:
-          - Internal Testers
