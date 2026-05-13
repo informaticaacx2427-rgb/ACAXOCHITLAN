@@ -39,9 +39,21 @@ workflows:
 
           xcode-project use-profiles
 
-      - name: Build IPA
+      - name: Build Archive (Xcode)
         script: |
-          flutter build ipa --release
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            archive
+
+      - name: Export IPA (FIX PROVISIONING)
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Verify IPA
         script: |
