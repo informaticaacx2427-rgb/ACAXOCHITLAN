@@ -37,14 +37,15 @@ workflows:
 
           keychain add-certificates
 
-      - name: Ensure provisioning profiles
-        script: |
-          xcode-project use-profiles --export-method app-store
+          xcode-project use-profiles
 
-      - name: Build IPA (correct)
+      - name: Build IPA
         script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release
+
+      - name: Verify IPA
+        script: |
+          find build -name "*.ipa"
 
     artifacts:
       - build/ios/ipa/*.ipa
