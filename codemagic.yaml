@@ -13,49 +13,52 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
+      # LIMPIAR PROYECTO
       - name: Clean project
         script: |
           flutter clean
           flutter pub get
 
+      # COCOAPODS
       - name: Install CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      # CERTIFICADOS Y PROFILES (AD HOC)
+      # CONFIGURAR CERTIFICADOS Y PROFILES APP STORE
       - name: Set up code signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files com.acaxochi.turismo --type IOS_APP_ADHOC --create
+
+          app-store-connect fetch-signing-files com.acaxochi.turismo \
+            --type IOS_APP_STORE \
+            --create
+
           keychain add-certificates
+
           xcode-project use-profiles
 
-      # BUILD ARCHIVE
-      - name: Build Archive
+      # BUILD IOS
+      - name: Build iOS
         script: |
-          flutter build ios --release --no-codesign
+          flutter build ipa --release
 
-          xcodebuild -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            archive
-
-      # EXPORT IPA
-      - name: Export IPA
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
-
-      # DEBUG
+      # VERIFICAR IPA
       - name: Debug IPA
         script: |
           find build -name "*.ipa" || true
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/**/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+
+        submit_to_testflight: true
+
+        beta_groups:
+          - Internal Testers
