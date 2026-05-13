@@ -16,7 +16,7 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      # LIMPIAR PROYECTO
+      # LIMPIEZA
       - name: Clean project
         script: |
           flutter clean
@@ -29,14 +29,7 @@ workflows:
           pod install
           cd ..
 
-      # INCREMENTO AUTOMÁTICO DE BUILD NUMBER (SOLUCIÓN A TU ERROR)
-      - name: Increment build number
-        script: |
-          BUILD_NUMBER=$(($(app-store-connect get-latest-testflight-build-number com.acaxochi.turismo) + 1))
-          echo "Nuevo build number: $BUILD_NUMBER"
-          agvtool new-version -all $BUILD_NUMBER
-
-      # FIRMA Y PROFILES
+      # FIRMA APP STORE (PROFILES AUTOMÁTICOS)
       - name: Set up code signing
         script: |
           keychain initialize
@@ -49,14 +42,15 @@ workflows:
 
           xcode-project use-profiles
 
-      # BUILD IPA
+      # BUILD IPA (CORRECTO EN FLUTTER)
       - name: Build IPA
         script: |
           flutter build ipa --release
 
-      # VERIFICAR IPA
+      # VERIFICAR OUTPUT
       - name: Verify IPA
         script: |
+          echo "Buscando IPA generado..."
           find build -name "*.ipa"
 
     artifacts:
