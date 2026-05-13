@@ -16,18 +16,28 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
+      # LIMPIAR PROYECTO
       - name: Clean project
         script: |
           flutter clean
           flutter pub get
 
+      # COCOAPODS
       - name: Install CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      - name: Fetch signing files
+      # INCREMENTO AUTOMÁTICO DE BUILD NUMBER (SOLUCIÓN A TU ERROR)
+      - name: Increment build number
+        script: |
+          BUILD_NUMBER=$(($(app-store-connect get-latest-testflight-build-number com.acaxochi.turismo) + 1))
+          echo "Nuevo build number: $BUILD_NUMBER"
+          agvtool new-version -all $BUILD_NUMBER
+
+      # FIRMA Y PROFILES
+      - name: Set up code signing
         script: |
           keychain initialize
 
@@ -39,22 +49,12 @@ workflows:
 
           xcode-project use-profiles
 
-      - name: Build Archive (Xcode)
+      # BUILD IPA
+      - name: Build IPA
         script: |
-          xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            archive
+          flutter build ipa --release
 
-      - name: Export IPA (FIX PROVISIONING)
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
-
+      # VERIFICAR IPA
       - name: Verify IPA
         script: |
           find build -name "*.ipa"
