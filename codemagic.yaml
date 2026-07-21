@@ -1,11 +1,8 @@
 workflows:
   ios-release:
-    name: iOS IPA Release
+    name: iOS Release
 
     max_build_duration: 60
-
-    integrations:
-      app_store_connect: Codemagic iOS
 
     environment:
       flutter: stable
@@ -16,7 +13,7 @@ workflows:
         bundle_identifier: com.acaxochi.turismo
 
     scripts:
-      - name: Clean project
+      - name: Get Flutter packages
         script: |
           flutter clean
           flutter pub get
@@ -27,39 +24,22 @@ workflows:
           pod install
           cd ..
 
-      - name: Fetch signing files
+      - name: Initialize keychain
         script: |
           keychain initialize
 
+      - name: Fetch signing files
+        script: |
           app-store-connect fetch-signing-files com.acaxochi.turismo \
             --type IOS_APP_STORE \
             --create
 
           keychain add-certificates
-
           xcode-project use-profiles
 
-      # 🔥 BUILD ARCHIVE MANUAL (EVITA BUG FLUTTER IPA)
-      - name: Build Archive
+      - name: Build IPA
         script: |
-          xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            archive
-
-      # 🔥 EXPORT CORRECTO (FIX PROVISIONING PROFILE)
-      - name: Export IPA
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
-
-      - name: Verify IPA
-        script: |
-          find build -name "*.ipa"
+          flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
