@@ -4,19 +4,24 @@ workflows:
 
     max_build_duration: 60
 
-    integrations:
-      app_store_connect: Codemagic iOS
-
     environment:
       flutter: stable
       xcode: latest
+
+      vars:
+        BUNDLE_ID: com.acaxochi.turismo
 
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.acaxochi.turismo
 
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - ios/Pods
+
     scripts:
-      - name: Clean project
+      - name: Flutter packages
         script: |
           flutter clean
           flutter pub get
@@ -27,39 +32,27 @@ workflows:
           pod install
           cd ..
 
-      - name: Fetch signing files
+      - name: Initialize Keychain
         script: |
           keychain initialize
 
-          app-store-connect fetch-signing-files com.acaxochi.turismo \
+      - name: Fetch Signing Files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
 
+      - name: Add Certificates
+        script: |
           keychain add-certificates
 
+      - name: Use Provisioning Profiles
+        script: |
           xcode-project use-profiles
 
-      # 🔥 BUILD ARCHIVE MANUAL (EVITA BUG FLUTTER IPA)
-      - name: Build Archive
+      - name: Build IPA
         script: |
-          xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            archive
-
-      # 🔥 EXPORT CORRECTO (FIX PROVISIONING PROFILE)
-      - name: Export IPA
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
-
-      - name: Verify IPA
-        script: |
-          find build -name "*.ipa"
+          flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -67,4 +60,8 @@ workflows:
 
     publishing:
       app_store_connect:
-        auth: integration
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        submit_to_app_store: false
