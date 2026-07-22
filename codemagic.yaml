@@ -18,10 +18,11 @@ workflows:
     cache:
       cache_paths:
         - $HOME/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
         - ios/Pods
 
     scripts:
-      - name: Clean project
+      - name: Flutter packages
         script: |
           flutter clean
           flutter pub get
@@ -29,7 +30,7 @@ workflows:
       - name: Install CocoaPods
         script: |
           cd ios
-          pod install
+          pod install --repo-update
           cd ..
 
       - name: Initialize Keychain
@@ -39,21 +40,67 @@ workflows:
       - name: Fetch Signing Files
         script: |
           app-store-connect fetch-signing-files $BUNDLE_ID \
-            --issuer-id $APP_STORE_CONNECT_ISSUER_ID \
-            --key-id $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             --private-key "$APP_STORE_CONNECT_PRIVATE_KEY" \
             --type IOS_APP_STORE \
             --create
 
+      - name: Configure signing
+        script: |
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Build IPA
+      - name: Build Archive
         script: |
-          flutter build ipa --release
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath $CM_BUILD_DIR/build/Runner.xcarchive \
+            archive \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="" \
+            -allowProvisioningUpdates
+
+      - name: Export IPA
+        script: |
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>destination</key>
+              <string>export</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/Runner.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/ios/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates
+
+      - name: Verify IPA
+        script: |
+          ls -R build
+          find build -name "*.ipa"
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/Runner.xcarchive
       - /tmp/xcodebuild_logs/*.log
 
     publishing:
@@ -62,4 +109,3 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
-        submit_to_app_store: false
